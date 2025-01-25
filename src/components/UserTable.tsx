@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Table, Button, Form } from 'react-bootstrap';
-import { FaLock, FaUnlock, FaTrash } from 'react-icons/fa';
+import { FaUnlock, FaTrash } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 import type { UserProfile } from '../types/database';
@@ -12,7 +12,9 @@ export function UserTable() {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const { data: session } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (session?.user) {
         setCurrentUser(session.user.id);
       }
@@ -34,7 +36,11 @@ export function UserTable() {
 
     const channel = supabase
       .channel('user_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'user_profiles' }, fetchUsers)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'user_profiles' },
+        fetchUsers
+      )
       .subscribe();
 
     return () => {
@@ -43,12 +49,12 @@ export function UserTable() {
   }, []);
 
   const handleSelectAll = (checked: boolean) => {
-    setSelectedUsers(checked ? users.map(user => user.id) : []);
+    setSelectedUsers(checked ? users.map((user) => user.id) : []);
   };
 
   const handleSelectUser = (userId: string, checked: boolean) => {
-    setSelectedUsers(prev => 
-      checked ? [...prev, userId] : prev.filter(id => id !== userId)
+    setSelectedUsers((prev) =>
+      checked ? [...prev, userId] : prev.filter((id) => id !== userId)
     );
   };
 
@@ -69,7 +75,7 @@ export function UserTable() {
     }
 
     toast.success('Users blocked successfully');
-    
+
     if (selectedUsers.includes(currentUser)) {
       await supabase.auth.signOut();
     }
@@ -118,26 +124,26 @@ export function UserTable() {
   };
 
   return (
-    <div className="container mt-4">
-      <div className="mb-3 d-flex gap-2">
-        <Button 
-          variant="danger" 
+    <div className='container mt-4'>
+      <div className='mb-3 d-flex gap-2'>
+        <Button
+          variant='danger'
           onClick={handleBlock}
-          title="Block selected users"
+          title='Block selected users'
         >
           Block
         </Button>
-        <Button 
-          variant="success" 
+        <Button
+          variant='success'
           onClick={handleUnblock}
-          title="Unblock selected users"
+          title='Unblock selected users'
         >
           <FaUnlock />
         </Button>
-        <Button 
-          variant="danger" 
+        <Button
+          variant='danger'
           onClick={handleDelete}
-          title="Delete selected users"
+          title='Delete selected users'
         >
           <FaTrash />
         </Button>
@@ -148,7 +154,7 @@ export function UserTable() {
           <tr>
             <th>
               <Form.Check
-                type="checkbox"
+                type='checkbox'
                 onChange={(e) => handleSelectAll(e.target.checked)}
                 checked={selectedUsers.length === users.length}
               />
@@ -165,7 +171,7 @@ export function UserTable() {
             <tr key={user.id}>
               <td>
                 <Form.Check
-                  type="checkbox"
+                  type='checkbox'
                   onChange={(e) => handleSelectUser(user.id, e.target.checked)}
                   checked={selectedUsers.includes(user.id)}
                 />
@@ -175,7 +181,11 @@ export function UserTable() {
               <td>{new Date(user.last_login).toLocaleString()}</td>
               <td>{new Date(user.last_activity).toLocaleString()}</td>
               <td>
-                <span className={`badge bg-${user.status === 'active' ? 'success' : 'danger'}`}>
+                <span
+                  className={`badge bg-${
+                    user.status === 'active' ? 'success' : 'danger'
+                  }`}
+                >
                   {user.status}
                 </span>
               </td>

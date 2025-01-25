@@ -11,7 +11,9 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) {
         navigate('/login');
         return;
@@ -30,7 +32,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
       }
     };
 
-    const authListener = supabase.auth.onAuthStateChange(async (event, session) => {
+    const authListener = supabase.auth.onAuthStateChange(async (session) => {
       if (!session) {
         navigate('/login');
       }
